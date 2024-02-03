@@ -1,0 +1,38 @@
+.title{
+  font-family: Nunito;
+font-size: 24px;
+font-weight: 600;
+line-height: 33px;
+letter-spacing: 0em;
+text-align: left;
+color:black
+
+}
+.uploadname{
+  
+  font-family: Figtree;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: 0px;
+  text-align: left;
+  
+
+}
+.lefttext{
+  font-family: Nunito;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: 0em;
+  text-align: left;
+  
+}
+.draganddrop{
+  width: 596px;
+  height: 367px;
+  top: 218px;
+  left: 518px;
+  border-radius: 8px;
+  
+}
