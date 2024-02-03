@@ -6,12 +6,13 @@ import LeftSidebar from "./components/LeftSidebar";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import RightSidebar from "./components/RightSidebar";
+import RightSidebar1 from "./components/RightSidebar1";
 
 function App() {
   return (
     <div className="App">
   <Navbar/>
-    <BrowserRouter>
+    {/* <BrowserRouter>
       <div className="flex">
         <LeftSidebar />
         <Routes>
@@ -19,10 +20,11 @@ function App() {
         
         </Routes>
       </div>
-    </BrowserRouter>
+    </BrowserRouter> */}
 
       {/* <LeftSidebar/> */}
-      {/* <RightSidebar/> */}
+      <RightSidebar1/>
+     
     </div>
   );
 }
