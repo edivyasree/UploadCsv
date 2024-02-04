@@ -12,18 +12,18 @@ function App() {
   return (
     <div className="App">
   <Navbar/>
-    {/* <BrowserRouter>
+    <BrowserRouter>
       <div className="flex">
         <LeftSidebar />
         <Routes>
-          <Route path="/" element={<RightSidebar/>} />
+          <Route path="/" element={<RightSidebar1/>} />
         
         </Routes>
       </div>
-    </BrowserRouter> */}
+    </BrowserRouter>
 
       {/* <LeftSidebar/> */}
-      <RightSidebar1/>
+      
      
     </div>
   );

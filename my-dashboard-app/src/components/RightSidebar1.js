@@ -1,135 +1,185 @@
-import React, { useState } from 'react';
-import { HiOutlineCloudUpload, HiOutlineTrash } from 'react-icons/hi';
+import React, { useState, useEffect } from "react";
+import { HiOutlineCloudUpload, HiOutlineTrash } from "react-icons/hi";
+import Papa from "papaparse";
 
 const RightSidebar1 = () => {
-    const [isDragging, setIsDragging] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [excelData, setExcelData] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [csvData, setCsvData] = useState([]);
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [selectedValues, setSelectedValues] = useState({});
 
-    const handleDragEnter = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
+  useEffect(() => {
+    if (csvData.length > 0) {
+      const uniqueOptions = [...new Set(csvData.map(row => row[3]))];
+      setDropdownOptions(uniqueOptions);
+    }
+  }, [csvData]);
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = (files) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      Papa.parse(text, {
+        complete: (result) => {
+          setCsvData(result.data);
+          const initialSelectedValues = {};
+          result.data.forEach((row, index) => {
+            initialSelectedValues[index] = "";
+          });
+          setSelectedValues(initialSelectedValues);
+        },
+        header: true,
+      });
     };
+    reader.readAsText(files[0]);
+    setUploadedFiles(files);
+  };
 
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-    };
+  const handleUploadClick = () => {
+    document.getElementById("fileInput").click();
+  };
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+  };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+  const handleRemoveClick = () => {
+    setUploadedFiles([]);
+    setCsvData([]);
+    setSelectedValues({});
+  };
 
-        setIsDragging(false);
+  const handleSelectChange = (e, rowIndex) => {
+    const selectedValue = e.target.value;
+    setSelectedValues(prevState => ({
+      ...prevState,
+      [rowIndex]: selectedValue,
+    }));
+  };
 
-        const files = Array.from(e.dataTransfer.files);
-        handleFiles(files);
-    };
-
-    const handleFiles = (files) => {
-        // Process the uploaded files (e.g., send them to the server)
-        console.log("Files uploaded:", files);
-        setUploadedFiles(files);
-
-        // Assuming you have a function to parse the Excel data, parseExcelData()
-        const excelData = parseExcelData(files);
-        setExcelData(excelData);
-    };
-
-    const handleUploadClick = () => {
-        // Trigger the hidden file input element
-        document.getElementById('fileInput').click();
-    };
-
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        handleFiles(files);
-    };
-
-    const handleRemoveClick = () => {
-        setUploadedFiles([]);
-        setExcelData([]);
-    };
-
-    const parseExcelData = (files) => {
-        // Parse Excel data here (e.g., using a library like XLSX.js)
-        // Example: const excelData = parse(files[0]);
-        // Return the parsed data
-        return [];
-    };
-
-    return (
-        <div className="flex justify-center items-center h-screen">
-            <div
-                className={`w-2/5 h-2/5 flex flex-col justify-center items-center p-8 border-4 border-dashed rounded-lg ${
-                    isDragging ? 'border-blue-500' : 'border-gray-300'
-                }`}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-            >
-                <div className="text-center mb-4">
-                    {excelData.length === 0 ? (
-                        <>
-                            <HiOutlineCloudUpload className="w-12 h-12" />
-                            <p className="text-lg text-gray-600">Drag & drop your CSV file here</p>
-                            <p className="text-sm text-gray-500 cursor-pointer" onClick={handleUploadClick}>
-                                (or click to browse)
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <HiOutlineTrash className="w-12 h-12 text-red-600" />
-                            <p className="text-lg text-gray-600">File Uploaded</p>
-                            <button className="bg-red-500 text-white font-semibold py-2 px-4 rounded mt-2" onClick={handleRemoveClick}>
-                                Remove
-                            </button>
-                        </>
-                    )}
-                </div>
-                <input
-                    type="file"
-                    id="fileInput"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept=".csv"
-                />
-                {excelData.length > 0 && (
-                    <table className="table-auto">
-                        <thead>
-                            <tr>
-                                {excelData[0].map((header, index) => (
-                                    <th key={index} className="border px-4 py-2">{header}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {excelData.slice(1).map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    {row.map((cell, cellIndex) => (
-                                        <tr>
-                                        <td key={cellIndex} className="border px-4 py-2">{cell.id}</td>
-                                        <td className="border px-4 py-2">{cell.links}</td>
-                                        <td  className="border px-4 py-2">{cell.prefix}</td>
-                                        </tr>
-
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+  return (
+    <div className="flex justify-center mx-80 h-screen">
+      <div
+        className={`w-5/6 h-3/6 flex flex-col mr-56 p-8 border-4 mt-20 border-dashed rounded-lg ${
+          isDragging ? "border-blue-500" : "border-gray-300"
+        }`}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        <div className="text-center mb-4">
+          {uploadedFiles.length === 0 ? (
+            <>
+              <HiOutlineCloudUpload className="w-12 h-12" />
+              <p className="text-lg text-gray-600">
+                Drag & drop your CSV file here
+              </p>
+              <p
+                className="text-sm text-gray-500 cursor-pointer"
+                onClick={handleUploadClick}
+              >
+                (or click to browse)
+              </p>
+            </>
+          ) : (
+            <>
+              <HiOutlineTrash className="w-12 h-12 text-red-600" />
+              <p className="text-lg text-gray-600">File Uploaded</p>
+              <button
+                className="bg-red-500 text-white font-semibold py-2 px-4 rounded mt-2"
+                onClick={handleRemoveClick}
+              >
+                Remove
+              </button>
+            </>
+          )}
         </div>
-    );
+        <button
+          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded"
+          onClick={handleUploadClick}
+        >
+          Upload
+        </button>
+        <input
+          type="file"
+          id="fileInput"
+          className="hidden"
+          onChange={handleFileChange}
+          accept=".csv"
+        />
+        <div className="mt-4">
+          <table className="table-auto border-collapse border border-blue-800">
+            <thead>
+              <tr>
+                {csvData.length > 0 &&
+                  Object.keys(csvData[0]).map((key, index) => (
+                    <th key={index} className="border border-blue-600 px-4 py-2">
+                      {key}
+                    </th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody>
+  {csvData.map((row, rowIndex) => (
+    <tr key={rowIndex}>
+      {Object.entries(row).map(([key, value], columnIndex) => (
+        <td key={columnIndex} className="border border-blue-600 px-4 py-2">
+          {columnIndex === 3 ? (
+            <select
+              value={selectedValues[rowIndex] || ''} // Set the value to selected value or empty string if not selected
+              onChange={(e) => handleSelectChange(e, rowIndex)}
+            >
+              <option value="">Select...</option>
+              {dropdownOptions.map((option, optionIndex) => (
+                <option key={optionIndex} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          ) : (
+            value
+          )}
+        </td>
+      ))}
+    </tr>
+  ))}
+</tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default RightSidebar1;
